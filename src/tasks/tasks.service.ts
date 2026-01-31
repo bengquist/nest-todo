@@ -1,39 +1,40 @@
-import { randomUUID } from 'crypto';
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateTaskDto } from './dto';
-import { Task } from './interfaces';
+import { Task } from './entities';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TaskCategory, TaskPriority, TaskStatus } from './enums';
 
 @Injectable()
 export class TasksService {
-  private readonly tasks: Task[] = [
-    {
-      id: randomUUID(),
-      title: 'Sample Task',
-      description: 'This is a sample task description',
-      category: 'General',
-      priority: 'medium',
-      status: 'pending',
-      dueDate: new Date().toISOString(),
-    },
-  ];
+  constructor(
+    @InjectRepository(Task)
+    private readonly tasksRepository: Repository<Task>,
+  ) {}
 
-  create(task: CreateTaskDto) {
-    this.tasks.push({
-      id: randomUUID(),
-      ...task,
-    });
+  async create(createTaskDto: CreateTaskDto): Promise<Task> {
+    const task = this.tasksRepository.create(createTaskDto);
 
-    return this.tasks[this.tasks.length - 1];
+    return this.tasksRepository.save(task);
   }
 
-  findAll(): Task[] {
-    return this.tasks;
+  findAll(filters?: {
+    category?: TaskCategory;
+    priority?: TaskPriority;
+    status?: TaskStatus;
+  }): Promise<Task[]> {
+    const where = filters
+      ? Object.fromEntries(
+          Object.entries(filters).filter(([, value]) => !!value),
+        )
+      : {};
+
+    return this.tasksRepository.find({ where });
   }
 
-  findOne(id: string): Task {
-    const task = this.tasks.find((task) => task.id === id);
+  async findOne(id: string): Promise<Task> {
+    const task = await this.tasksRepository.findOne({ where: { id } });
 
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
@@ -42,27 +43,20 @@ export class TasksService {
     return task;
   }
 
-  update(id: string, updateTaskDto: Partial<CreateTaskDto>): Task {
-    const taskIndex = this.tasks.findIndex((task) => task.id === id);
+  async update(
+    id: string,
+    updateTaskDto: Partial<CreateTaskDto>,
+  ): Promise<Task> {
+    const task = await this.findOne(id);
 
-    if (taskIndex === -1) {
-      throw new NotFoundException(`Task with id ${id} not found`);
-    }
+    Object.assign(task, updateTaskDto);
 
-    const updatedTask = { ...this.tasks[taskIndex], ...updateTaskDto };
-
-    this.tasks[taskIndex] = updatedTask;
-
-    return updatedTask;
+    return this.tasksRepository.save(task);
   }
 
-  remove(id: string) {
-    const taskIndex = this.tasks.findIndex((task) => task.id === id);
+  async remove(id: string): Promise<void> {
+    const task = await this.findOne(id);
 
-    if (taskIndex === -1) {
-      throw new NotFoundException(`Task with id ${id} not found`);
-    }
-
-    this.tasks.splice(taskIndex, 1);
+    await this.tasksRepository.remove(task);
   }
 }

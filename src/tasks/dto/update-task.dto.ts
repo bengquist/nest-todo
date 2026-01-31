@@ -1,5 +1,7 @@
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
+import { TaskCategory, TaskPriority, TaskStatus } from '../enums';
+
 export class UpdateTaskDto {
   @IsOptional()
   @IsString()
@@ -10,16 +12,16 @@ export class UpdateTaskDto {
   description?: string;
 
   @IsOptional()
-  @IsString()
-  category?: string;
+  @IsEnum(TaskCategory)
+  category?: TaskCategory;
 
   @IsOptional()
-  @IsEnum(['low', 'medium', 'high'])
-  priority?: 'low' | 'medium' | 'high';
+  @IsEnum(TaskPriority)
+  priority?: TaskPriority;
 
   @IsOptional()
-  @IsEnum(['pending', 'in-progress', 'completed'])
-  status?: 'pending' | 'in-progress' | 'completed';
+  @IsEnum(TaskStatus)
+  status?: TaskStatus;
 
   @IsOptional()
   @IsDateString()

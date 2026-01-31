@@ -11,29 +11,30 @@ import {
 } from '@nestjs/common';
 import { CreateTaskDto, UpdateTaskDto } from './dto';
 import { TasksService } from './tasks.service';
-import type { Task } from './interfaces';
+import { Task } from './entities';
 import type { UUID } from 'crypto';
+import { TaskCategory, TaskPriority, TaskStatus } from './enums';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto): Task {
+  create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return this.tasksService.create(createTaskDto);
   }
 
   @Get()
   findAll(
-    @Query('category') category?: string,
-    @Query('priority') priority?: string,
-    @Query('status') status?: string,
-  ): Task[] {
-    return this.tasksService.findAll();
+    @Query('category') category?: TaskCategory,
+    @Query('priority') priority?: TaskPriority,
+    @Query('status') status?: TaskStatus,
+  ): Promise<Task[]> {
+    return this.tasksService.findAll({ category, priority, status });
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: UUID): Task {
+  findOne(@Param('id', ParseUUIDPipe) id: UUID): Promise<Task> {
     return this.tasksService.findOne(id);
   }
 
@@ -41,12 +42,12 @@ export class TasksController {
   update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() updateTaskDto: UpdateTaskDto,
-  ): Task {
+  ): Promise<Task> {
     return this.tasksService.update(id, updateTaskDto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: UUID): void {
-    this.tasksService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
+    return this.tasksService.remove(id);
   }
 }
