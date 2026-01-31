@@ -1,0 +1,9 @@
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  priority?: 'low' | 'medium' | 'high';
+  status?: 'pending' | 'in-progress' | 'completed';
+  dueDate?: string;
+}
