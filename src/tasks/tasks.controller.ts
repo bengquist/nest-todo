@@ -8,7 +8,6 @@ import {
   Post,
   Put,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { CreateTaskDto, UpdateTaskDto } from './dto';
 import { TasksService } from './tasks.service';
@@ -20,7 +19,7 @@ export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Post()
-  create(@Body(new ValidationPipe()) createTaskDto: CreateTaskDto): Task {
+  create(@Body() createTaskDto: CreateTaskDto): Task {
     return this.tasksService.create(createTaskDto);
   }
 
@@ -41,7 +40,7 @@ export class TasksController {
   @Put(':id')
   update(
     @Param('id', ParseUUIDPipe) id: UUID,
-    @Body(new ValidationPipe()) updateTaskDto: UpdateTaskDto,
+    @Body() updateTaskDto: UpdateTaskDto,
   ): Task {
     return this.tasksService.update(id, updateTaskDto);
   }
