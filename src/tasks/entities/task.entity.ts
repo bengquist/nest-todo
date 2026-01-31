@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { User } from '../../users/entities';
 import { TaskCategory, TaskPriority, TaskStatus } from '../enums';
 
 @Entity({ name: 'tasks' })
@@ -32,4 +33,10 @@ export class Task {
 
   @Column({ type: 'date', nullable: true })
   dueDate?: string;
+
+  @Column('uuid')
+  userId: string;
+
+  @ManyToOne(() => User, (user) => user.tasks, { onDelete: 'CASCADE' })
+  user: User;
 }
