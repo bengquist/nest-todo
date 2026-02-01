@@ -8,14 +8,17 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateTaskDto, UpdateTaskDto } from './dto';
 import { TasksService } from './tasks.service';
 import { Task } from './entities';
 import type { UUID } from 'crypto';
 import { TaskCategory, TaskPriority, TaskStatus } from './enums';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('tasks')
+@UseGuards(AuthGuard)
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
